@@ -535,34 +535,69 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public ChatResult chatString(ChatModelBase model, Prompt prompt) {
-        return chatString(model, null, (byte[]) null, null, prompt);
+        return chatString(model, null, (byte[]) null, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatString(ChatModelBase model, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatString(model, null, (byte[]) null, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatString(ChatModelBase model, String systemPrompt, Prompt prompt) {
-        return chatString(model, null, (byte[]) null, systemPrompt, prompt);
+        return chatString(model, null, (byte[]) null, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatString(ChatModelBase model, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatString(model, null, (byte[]) null, systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatString(ChatModelBase model, MultipartFile multipartFile, Prompt prompt) {
-        return chatString(model, multipartFile, null, prompt);
+        return chatString(model, multipartFile, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatString(ChatModelBase model, MultipartFile multipartFile, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatString(model, multipartFile, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatString(ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt) {
         Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
-        return chatString(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt);
+        return chatString(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatString(ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
+        return chatString(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatString(ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt) {
-        return chatString(model, mimeType, inputStream, null, prompt);
+        return chatString(model, mimeType, inputStream, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatString(ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatString(model, mimeType, inputStream, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatString(ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt) {
         try (inputStream) {
-            return chatString(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt);
+            return chatString(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, false, false);
+        } catch (IOException e) {
+            throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
+        }
+    }
+
+    @Override
+    public ChatResult chatString(ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        try (inputStream) {
+            return chatString(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
         } catch (IOException e) {
             throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
         }
@@ -570,11 +605,21 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public ChatResult chatString(ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt) {
-        return chatString(model, mimeType, byteArray, null, prompt);
+        return chatString(model, mimeType, byteArray, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatString(ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatString(model, mimeType, byteArray, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatString(ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt) {
+        return chatString(model, mimeType, byteArray, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatString(ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
         this.validateParams(prompt);
         // 计时器
         StopWatch sw = new StopWatch();
@@ -605,7 +650,7 @@ public class AiChatServiceImpl implements AiChatService {
                 reasoningContent = output.getReasoningContent() != null ? output.getReasoningContent() : StringUtils.EMPTY;
             } else {
                 String text = assistantMessage.getText() != null ? assistantMessage.getText() : StringUtils.EMPTY;
-                ReasonStreamParser reasonStreamParser = new ReasonStreamParser();
+                ReasonStreamParser reasonStreamParser = new ReasonStreamParser(isReasoningMode, isOrphanEndTag);
                 reasonStreamParser.processChunk(text);
                 content = reasonStreamParser.getReplyContent();
                 reasoningContent = reasonStreamParser.getThinkContent();
@@ -621,34 +666,69 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public Stream<ChatResultChunk> chatStream(ChatModelBase model, Prompt prompt) {
-        return chatStream(model, null, (byte[]) null, null, prompt);
+        return chatStream(model, null, (byte[]) null, null, prompt, false, false);
+    }
+
+    @Override
+    public Stream<ChatResultChunk> chatStream(ChatModelBase model, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatStream(model, null, (byte[]) null, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Stream<ChatResultChunk> chatStream(ChatModelBase model, String systemPrompt, Prompt prompt) {
-        return chatStream(model, null, (byte[]) null, systemPrompt, prompt);
+        return chatStream(model, null, (byte[]) null, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public Stream<ChatResultChunk> chatStream(ChatModelBase model, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatStream(model, null, (byte[]) null, systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Stream<ChatResultChunk> chatStream(ChatModelBase model, MultipartFile multipartFile, Prompt prompt) {
-        return chatStream(model, multipartFile, null, prompt);
+        return chatStream(model, multipartFile, null, prompt, false, false);
+    }
+
+    @Override
+    public Stream<ChatResultChunk> chatStream(ChatModelBase model, MultipartFile multipartFile, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatStream(model, null, (byte[]) null, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Stream<ChatResultChunk> chatStream(ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt) {
         Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
-        return chatStream(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt);
+        return chatStream(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public Stream<ChatResultChunk> chatStream(ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
+        return chatStream(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Stream<ChatResultChunk> chatStream(ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt) {
-        return chatStream(model, mimeType, inputStream, null, prompt);
+        return chatStream(model, mimeType, inputStream, null, prompt, false, false);
+    }
+
+    @Override
+    public Stream<ChatResultChunk> chatStream(ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatStream(model, mimeType, inputStream, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Stream<ChatResultChunk> chatStream(ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt) {
         try (inputStream) {
-            return chatStream(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt);
+            return chatStream(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, false, false);
+        } catch (IOException e) {
+            throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
+        }
+    }
+
+    @Override
+    public Stream<ChatResultChunk> chatStream(ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        try (inputStream) {
+            return chatStream(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
         } catch (IOException e) {
             throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
         }
@@ -656,11 +736,21 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public Stream<ChatResultChunk> chatStream(ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt) {
-        return chatStream(model, mimeType, byteArray, null, prompt);
+        return chatStream(model, mimeType, byteArray, null, prompt, false, false);
+    }
+
+    @Override
+    public Stream<ChatResultChunk> chatStream(ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatStream(model, mimeType, byteArray, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Stream<ChatResultChunk> chatStream(ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt) {
+        return chatStream(model, mimeType, byteArray, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public Stream<ChatResultChunk> chatStream(ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
         this.validateParams(prompt);
         Flux<ChatResponse> chatResponseFlux = ChatManager.getChatClient(model)
                 .prompt(prompt)
@@ -676,7 +766,7 @@ public class AiChatServiceImpl implements AiChatService {
                 })
                 .stream()
                 .chatResponse();
-        ReasonStreamParser reasonStreamParser = new ReasonStreamParser();
+        ReasonStreamParser reasonStreamParser = new ReasonStreamParser(isReasoningMode, isOrphanEndTag);
         return model instanceof DeepSeekChatEntity ?
                 chatResponseFlux
                         .mapNotNull(chatResponse -> {
@@ -711,34 +801,69 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public Flux<ChatResultChunk> chatFlux(ChatModelBase model, Prompt prompt) {
-        return chatFlux(model, null, (byte[]) null, null, prompt);
+        return chatFlux(model, null, (byte[]) null, null, prompt, false, false);
+    }
+
+    @Override
+    public Flux<ChatResultChunk> chatFlux(ChatModelBase model, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(model, null, (byte[]) null, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Flux<ChatResultChunk> chatFlux(ChatModelBase model, String systemPrompt, Prompt prompt) {
-        return chatFlux(model, null, (byte[]) null, systemPrompt, prompt);
+        return chatFlux(model, null, (byte[]) null, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public Flux<ChatResultChunk> chatFlux(ChatModelBase model, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(model, null, (byte[]) null, systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MultipartFile multipartFile, Prompt prompt) {
-        return chatFlux(model, multipartFile, null, prompt);
+        return chatFlux(model, multipartFile, null, prompt, false, false);
+    }
+
+    @Override
+    public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MultipartFile multipartFile, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(model, multipartFile, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt) {
         Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
-        return chatFlux(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt);
+        return chatFlux(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
+        return chatFlux(model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt) {
-        return chatFlux(model, mimeType, inputStream, null, prompt);
+        return chatFlux(model, mimeType, inputStream, null, prompt, false, false);
+    }
+
+    @Override
+    public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(model, mimeType, inputStream, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt) {
         try (inputStream) {
-            return chatFlux(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt);
+            return chatFlux(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, false, false);
+        } catch (IOException e) {
+            throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
+        }
+    }
+
+    @Override
+    public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        try (inputStream) {
+            return chatFlux(model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
         } catch (IOException e) {
             throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
         }
@@ -746,11 +871,21 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt) {
-        return chatFlux(model, mimeType, byteArray, null, prompt);
+        return chatFlux(model, mimeType, byteArray, null, prompt, false, false);
+    }
+
+    @Override
+    public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(model, mimeType, byteArray, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt) {
+        return chatFlux(model, mimeType, byteArray, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public Flux<ChatResultChunk> chatFlux(ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
         this.validateParams(prompt);
         Flux<ChatResponse> chatResponseFlux = ChatManager.getChatClient(model)
                 .prompt(prompt)
@@ -766,7 +901,7 @@ public class AiChatServiceImpl implements AiChatService {
                 })
                 .stream()
                 .chatResponse();
-        ReasonStreamParser reasonStreamParser = new ReasonStreamParser();
+        ReasonStreamParser reasonStreamParser = new ReasonStreamParser(isReasoningMode, isOrphanEndTag);
         return model instanceof DeepSeekChatEntity ?
                 chatResponseFlux
                         .mapNotNull(chatResponse -> {
@@ -799,34 +934,69 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, Prompt prompt) {
-        return chatFlux(sseEmitter, model, null, (byte[]) null, null, prompt);
+        return chatFlux(sseEmitter, model, null, (byte[]) null, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(sseEmitter, model, null, (byte[]) null, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, String systemPrompt, Prompt prompt) {
-        return chatFlux(sseEmitter, model, null, (byte[]) null, systemPrompt, prompt);
+        return chatFlux(sseEmitter, model, null, (byte[]) null, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(sseEmitter, model, null, (byte[]) null, systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MultipartFile multipartFile, Prompt prompt) {
-        return chatFlux(sseEmitter, model, multipartFile, null, prompt);
+        return chatFlux(sseEmitter, model, multipartFile, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MultipartFile multipartFile, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(sseEmitter, model, multipartFile, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt) {
         Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
-        return chatFlux(sseEmitter, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt);
+        return chatFlux(sseEmitter, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
+        return chatFlux(sseEmitter, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt) {
-        return chatFlux(sseEmitter, model, mimeType, inputStream, null, prompt);
+        return chatFlux(sseEmitter, model, mimeType, inputStream, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(sseEmitter, model, mimeType, inputStream, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt) {
         try (inputStream) {
-            return chatFlux(sseEmitter, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt);
+            return chatFlux(sseEmitter, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, false, false);
+        } catch (IOException e) {
+            throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
+        }
+    }
+
+    @Override
+    public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        try (inputStream) {
+            return chatFlux(sseEmitter, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
         } catch (IOException e) {
             throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
         }
@@ -834,11 +1004,21 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt) {
-        return chatFlux(sseEmitter, model, mimeType, byteArray, null, prompt);
+        return chatFlux(sseEmitter, model, mimeType, byteArray, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(sseEmitter, model, mimeType, byteArray, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt) {
+        return chatFlux(sseEmitter, model, mimeType, byteArray, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(SseEmitter sseEmitter, ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
         this.validateParams(prompt, sseEmitter);
         // 结果总汇
         AtomicReference<String> content = new AtomicReference<>("");
@@ -846,7 +1026,7 @@ public class AiChatServiceImpl implements AiChatService {
         AtomicLong time = new AtomicLong();
         AtomicInteger usage = new AtomicInteger();
         // 非DeepSeek协议深度思考流解析器
-        ReasonStreamParser reasonStreamParser = new ReasonStreamParser();
+        ReasonStreamParser reasonStreamParser = new ReasonStreamParser(isReasoningMode, isOrphanEndTag);
         // 计时器
         StopWatch sw = new StopWatch();
         sw.start();
@@ -948,34 +1128,69 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public ChatResult chatFlux(Long userId, ChatModelBase model, Prompt prompt) {
-        return chatFlux(userId, model, null, (byte[]) null, null, prompt);
+        return chatFlux(userId, model, null, (byte[]) null, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, ChatModelBase model, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, model, null, (byte[]) null, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, ChatModelBase model, String systemPrompt, Prompt prompt) {
-        return chatFlux(userId, model, null, (byte[]) null, systemPrompt, prompt);
+        return chatFlux(userId, model, null, (byte[]) null, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, ChatModelBase model, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, model, null, (byte[]) null, systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, ChatModelBase model, MultipartFile multipartFile, Prompt prompt) {
-        return chatFlux(userId, model, multipartFile, null, prompt);
+        return chatFlux(userId, model, multipartFile, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, ChatModelBase model, MultipartFile multipartFile, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, model, multipartFile, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt) {
         Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
-        return chatFlux(userId, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt);
+        return chatFlux(userId, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
+        return chatFlux(userId, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt) {
-        return chatFlux(userId, model, mimeType, inputStream, null, prompt);
+        return chatFlux(userId, model, mimeType, inputStream, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, model, mimeType, inputStream, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt) {
         try (inputStream) {
-            return chatFlux(userId, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt);
+            return chatFlux(userId, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, false, false);
+        } catch (IOException e) {
+            throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
+        }
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        try (inputStream) {
+            return chatFlux(userId, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
         } catch (IOException e) {
             throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
         }
@@ -983,19 +1198,29 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public ChatResult chatFlux(Long userId, ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt) {
-        return chatFlux(userId, model, mimeType, byteArray, null, prompt);
+        return chatFlux(userId, model, mimeType, byteArray, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, model, mimeType, byteArray, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt) {
-        Map<String, SseEmitter> sseEmitters = this.validateParams(prompt,userId);
+        return chatFlux(userId, model, mimeType, byteArray, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        Map<String, SseEmitter> sseEmitters = this.validateParams(prompt, userId);
         // 结果总汇
         AtomicReference<String> content = new AtomicReference<>("");
         AtomicReference<String> reasoningContent = new AtomicReference<>("");
         AtomicLong time = new AtomicLong();
         AtomicInteger usage = new AtomicInteger();
         // 非DeepSeek协议深度思考流解析器
-        ReasonStreamParser reasonStreamParser = new ReasonStreamParser();
+        ReasonStreamParser reasonStreamParser = new ReasonStreamParser(isReasoningMode, isOrphanEndTag);
         // 计时器
         StopWatch sw = new StopWatch();
         sw.start();
@@ -1099,34 +1324,69 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public ChatResult chatFlux(Long userId, String token, ChatModelBase model, Prompt prompt) {
-        return chatFlux(userId, token, model, null, (byte[]) null, null, prompt);
+        return chatFlux(userId, token, model, null, (byte[]) null, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, String token, ChatModelBase model, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, token, model, null, (byte[]) null, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, String token, ChatModelBase model, String systemPrompt, Prompt prompt) {
-        return chatFlux(userId, token, model, null, (byte[]) null, systemPrompt, prompt);
+        return chatFlux(userId, token, model, null, (byte[]) null, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, String token, ChatModelBase model, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, token, model, null, (byte[]) null, systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MultipartFile multipartFile, Prompt prompt) {
-        return chatFlux(userId, token, model, multipartFile, null, prompt);
+        return chatFlux(userId, token, model, multipartFile, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MultipartFile multipartFile, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, token, model, multipartFile, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt) {
         Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
-        return chatFlux(userId, token, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt);
+        return chatFlux(userId, token, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MultipartFile multipartFile, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        Tuple2<MimeType, byte[]> tuple2 = this.handleMultipartFile(multipartFile);
+        return chatFlux(userId, token, model, tuple2.getT1(), tuple2.getT2(), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt) {
-        return chatFlux(userId, token, model, mimeType, inputStream, null, prompt);
+        return chatFlux(userId, token, model, mimeType, inputStream, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MimeType mimeType, InputStream inputStream, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, token, model, mimeType, inputStream, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt) {
         try (inputStream) {
-            return chatFlux(userId, token, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt);
+            return chatFlux(userId, token, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, false, false);
+        } catch (IOException e) {
+            throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
+        }
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MimeType mimeType, InputStream inputStream, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        try (inputStream) {
+            return chatFlux(userId, token, model, mimeType, StreamUtils.copyToByteArray(inputStream), systemPrompt, prompt, isReasoningMode, isOrphanEndTag);
         } catch (IOException e) {
             throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "处理参数[inputStream]时出错");
         }
@@ -1134,11 +1394,21 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt) {
-        return chatFlux(userId, token, model, mimeType, byteArray, null, prompt);
+        return chatFlux(userId, token, model, mimeType, byteArray, null, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MimeType mimeType, byte[] byteArray, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
+        return chatFlux(userId, token, model, mimeType, byteArray, null, prompt, isReasoningMode, isOrphanEndTag);
     }
 
     @Override
     public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt) {
+        return chatFlux(userId, token, model, mimeType, byteArray, systemPrompt, prompt, false, false);
+    }
+
+    @Override
+    public ChatResult chatFlux(Long userId, String token, ChatModelBase model, MimeType mimeType, byte[] byteArray, String systemPrompt, Prompt prompt, Boolean isReasoningMode, Boolean isOrphanEndTag) {
         SseEmitter sseEmitter = this.validateParams(prompt, userId, token);
         // 结果总汇
         AtomicReference<String> content = new AtomicReference<>("");
@@ -1146,7 +1416,7 @@ public class AiChatServiceImpl implements AiChatService {
         AtomicLong time = new AtomicLong();
         AtomicInteger usage = new AtomicInteger();
         // 非DeepSeek协议深度思考流解析器
-        ReasonStreamParser reasonStreamParser = new ReasonStreamParser();
+        ReasonStreamParser reasonStreamParser = new ReasonStreamParser(isReasoningMode, isOrphanEndTag);
         // 计时器
         StopWatch sw = new StopWatch();
         sw.start();
@@ -1270,7 +1540,7 @@ public class AiChatServiceImpl implements AiChatService {
     /**
      * 校验参数
      */
-    private Map<String, SseEmitter> validateParams(Prompt prompt,Long userId){
+    private Map<String, SseEmitter> validateParams(Prompt prompt, Long userId) {
         if (Objects.isNull(prompt)) {
             throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "参数[prompt]不能为空");
         }
@@ -1287,7 +1557,7 @@ public class AiChatServiceImpl implements AiChatService {
     /**
      * 校验参数
      */
-    private SseEmitter validateParams(Prompt prompt,Long userId, String token){
+    private SseEmitter validateParams(Prompt prompt, Long userId, String token) {
         if (Objects.isNull(prompt)) {
             throw new CustomizeAiException(ReturnCode.PARAMETER_FORMAT_MISMATCH, "参数[prompt]不能为空");
         }
